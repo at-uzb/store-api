@@ -1,50 +1,47 @@
-from rest_framework.views import APIView
+from rest_framework import generics, status
 from rest_framework.response import Response
-from rest_framework import status
-from .models import Category
-from .serializers import CategoryListSerializer, CategoryDetailSerializer
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
-from rest_framework.permissions import IsAdminUser, AllowAny
+
+from .models import Category
+from .serializers import CategorySerializer
+from products.permissions import IsAdmin
+from products.pagination import CustomPagination
 
 
-class CategoryListCreateView(APIView):
-    def get(self, request):
-        categories = Category.objects.all()
-        serializer = CategoryListSerializer(categories, many=True)
-        return Response(serializer.data, status=200)
+class CreateCategoryView(APIView):
+    serializer_class = CategorySerializer
+    permission_classes = [IsAuthenticated, IsAdmin]
 
-    def post(self, request):
-        if not request.user.is_staff:
-            return Response({"detail": "Only admins can add categories."}, status=403)
+    def post(self, request, *args, **kwargs):
+        data = request.data
+        serializer = self.serializer_class(data=data)
+        serializer.is_valid(raise_exception=True)
+        category = serializer.save()
+        category.slug = f"{category.name}-{category.id}"
+        category.save()
+        return Response(self.serializer_class(category).data, status=status.HTTP_201_CREATED)
+    
 
-        serializer = CategoryDetailSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=201)
-        return Response(serializer.errors, status=400)
+class UpdateCategoryView(APIView):
+    serializer_class = CategorySerializer
+    permission_classes = [IsAuthenticated, IsAdmin]
 
-
-class CategoryDetailView(APIView):
-    def get(self, request, pk):
+    def post(self, request, pk, *args, **kwargs):
         category = get_object_or_404(Category, pk=pk)
-        serializer = CategoryDetailSerializer(category)
-        return Response(serializer.data)
+        serializer = self.serializer_class(data=category, partial=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
 
-    def patch(self, request, pk):
-        category = get_object_or_404(Category, pk=pk)
-        if not request.user.is_staff:
-            return Response({"detail": "Only admins can update categories."}, status=403)
+class ListCategoryView(generics.ListAPIView):
+    queryset = Category.objects.all()
+    permission_classes = [AllowAny]
+    serializer_class = CategorySerializer
+    pagination_class = CustomPagination
 
-        serializer = CategoryDetailSerializer(category, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=400)
 
-    def delete(self, request, pk):
-        category = get_object_or_404(Category, pk=pk)
-        if not request.user.is_staff:
-            return Response({"detail": "Only admins can delete categories."}, status=403)
-
-        category.delete()
-        return Response({"detail": "Category deleted."}, status=204)
+class DeleteCategoryView(generics.DestroyAPIView):
+    permission_classes = [IsAuthenticated, IsAdmin]
+    serializer_class = CategorySerializer
+    queryset = Category.objects.all()

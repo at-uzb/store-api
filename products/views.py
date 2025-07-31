@@ -4,7 +4,6 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404
-from drf_spectacular.utils import extend_schema
 
 from .models import Product
 from .serializers import ProductSerializer
@@ -12,7 +11,6 @@ from .permissions import IsAdmin
 from .pagination import CustomPagination
 
 
-# @extend_schema(tags=["Products"])
 class ProductCreateView(generics.CreateAPIView):
     serializer_class = ProductSerializer
     permission_classes = [IsAuthenticated, IsAdmin]
@@ -31,6 +29,11 @@ class ProductUpdateView(APIView):
 
 
 class ProductListView(generics.ListAPIView):
+    """
+    List of Products in Pagination Response
+    Also works for searching products by name and category
+    Example: /api/products/list/?search=shampoo
+    """
     queryset = Product.objects.filter(is_active=True)
     serializer_class = ProductSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
