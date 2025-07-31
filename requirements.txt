@@ -1,0 +1,12 @@
+boto3==1.39.8
+botocore==1.39.8
+Django==5.2.4
+django-cors-headers==4.7.0
+django-storages==1.14.6
+djangorestframework==3.16.0
+djangorestframework_simplejwt==5.5.0
+drf-spectacular==0.28.0
+gunicorn==23.0.0
+pillow==11.3.0
+psycopg2-binary==2.9.10
+python-decouple==3.8
