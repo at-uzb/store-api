@@ -85,7 +85,7 @@ import dj_database_url
 
 DATABASES = {
     'default': dj_database_url.parse(
-        "postgresql://store_db_0rae_user:<your_password>@<external_host>:5432/store_db_0rae",
+        config('DB_URL'),
         conn_max_age=600,
         ssl_require=True
     )
