@@ -2,9 +2,10 @@ from django.utils import timezone
 from datetime import timedelta
 from django.db import models
 from django.core.validators import RegexValidator
-from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager, AbstractUser
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 from storages.backends.s3boto3 import S3Boto3Storage
 from django.db.models import DecimalField
+import uuid
 
 
 def user_upload_path(instance, filename):
@@ -27,6 +28,12 @@ class CustomUserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser, PermissionsMixin):
+    id = models.UUIDField(
+        unique=True,
+        default=uuid.uuid4,
+        editable=False,
+        primary_key=True
+    )
     name = models.CharField(max_length=75, blank=True)
     surname = models.CharField(max_length=75, blank=True)
     birth_date = models.DateField(blank=True, null=True)
