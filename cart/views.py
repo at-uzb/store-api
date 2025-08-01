@@ -12,6 +12,9 @@ from products.models import Product
 
 
 class CartView(APIView):
+    """
+    Cart View
+    """
     permission_classes = [IsAuthenticated]
     serializer_class = CartSerializer
 
@@ -22,6 +25,9 @@ class CartView(APIView):
 
 
 class AddToCartView(APIView):
+    """
+    Add Item to Cart
+    """
     permission_classes = [IsAuthenticated]
     serializer_class = AddToCartSerializer
 
