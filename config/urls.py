@@ -3,9 +3,11 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+from django.http import HttpResponseRedirect
 
 
 urlpatterns = [
+    path('', lambda request: HttpResponseRedirect('/api/docs/')),
     ## Apps.urls
     path('admin/', admin.site.urls),
     path('api/products/', include('products.urls')),
